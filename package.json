@@ -1,0 +1,41 @@
+{
+  "name": "supernova-slack",
+  "version": "1.0.0",
+  "description": "A personal selfbot for Slack!",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon -w package.json -w src -x 'tsx' --delay 2.5s ./src/index.ts",
+    "lint": "eslint",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "slack",
+    "selfbot"
+  ],
+  "author": "Nova",
+  "license": "MIT",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.3.0",
+      "onFail": "download"
+    }
+  },
+  "type": "module",
+  "dependencies": {
+    "@slack/bolt": "^4.7.3",
+    "@slack/web-api": "^7.18.0",
+    "dotenv": "^17.4.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.1.0",
+    "eslint": "^10.6.0",
+    "globals": "^17.7.0",
+    "jiti": "^2.7.0",
+    "nodemon": "^3.1.14",
+    "tsx": "^4.23.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.62.1"
+  }
+}
