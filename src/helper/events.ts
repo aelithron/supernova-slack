@@ -1,3 +1,4 @@
+import type { SlackHuddleBody } from "../huddle.js";
 import { getClients } from "../index.js";
 
 export default async function initEvents() {
@@ -18,18 +19,23 @@ export default async function initEvents() {
     if (args.length >= 2) {
       const match = args[1]!.match(/<#C[A-Z0-9]{8,11}>/gm);
       if (!match) {
-        respond({ response_type: "ephemeral", text: `you provided a channel to join, but in the wrong format! make sure the channel name is blue in the command.` });
+        respond({ response_type: "ephemeral", text: "you provided a channel to join, but in the wrong format! make sure the channel name is blue in the command." });
         return;
       }
       huddleChannel = args[1]!.slice(2, -1);
     } else huddleChannel = command.channel_id;
     if (args[0] === "join") {
       try {
-        const form = new FormData();
-        form.append("channel_id", huddleChannel);
-        const res = await fetch("https://hackclub.enterprise.slack.com/api/rooms.join", {  });
+        const data = new FormData();
+        data.append("channel_id", huddleChannel);
+        data.append("regions", "us-east-2");
+        data.append("token", process.env.SLACK_XOXC);
+        const res = await fetch("https://hackclub.enterprise.slack.com/api/rooms.join", { method: "POST", body: data, headers: { "Cookie": `d=${process.env.SLACK_XOXD}` } });
+        const info = await res.json() as SlackHuddleBody;
+        respond({ response_type: "ephemeral", text: `got it! telling <@U0BESAE7KPD> to join the huddle...` });
+        user.chat.postMessage({ channel: huddleChannel, thread_ts: info.huddle.thread_root_ts as string, text: `hi everyone! <@${command.user_id}> invited me to this huddle :3` });
       } catch (e) {
-        console.error(`[helper] error joining a huddle in ${args[1]}: ${e}`);
+        console.error(`[helper] error joining a huddle in ${huddleChannel}: ${e}`);
         respond({ response_type: "ephemeral", text: `there was an error joining the huddle in <#${huddleChannel}>!` });
         return;
       }
