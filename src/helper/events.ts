@@ -1,4 +1,4 @@
-import type { SlackHuddleBody } from "../huddle.js";
+import { joinHuddle, type SlackHuddleBody } from "../huddle.js";
 import { getClients } from "../index.js";
 
 export default async function initEvents() {
@@ -32,8 +32,13 @@ export default async function initEvents() {
         data.append("token", process.env.SLACK_XOXC);
         const res = await fetch("https://hackclub.enterprise.slack.com/api/rooms.join", { method: "POST", body: data, headers: { "Cookie": `d=${process.env.SLACK_XOXD}` } });
         const info = await res.json() as SlackHuddleBody;
-        respond({ response_type: "ephemeral", text: `got it! telling <@U0BESAE7KPD> to join the huddle...` });
-        user.chat.postMessage({ channel: huddleChannel, thread_ts: info.huddle.thread_root_ts as string, text: `hi everyone! <@${command.user_id}> invited me to this huddle :3` });
+        if (await joinHuddle(info)) { 
+          respond({ response_type: "ephemeral", text: `got it! telling <@U0BESAE7KPD> to join the huddle...` });
+          await user.chat.postMessage({ channel: huddleChannel, thread_ts: info.huddle.thread_root_ts as string, text: `hi everyone! <@${command.user_id}> invited me to this huddle :3` });
+        } else {
+          respond({ response_type: "ephemeral", text: `there was an error joining the huddle in <#${huddleChannel}>!` });
+          return;
+        }
       } catch (e) {
         console.error(`[helper] error joining a huddle in ${huddleChannel}: ${e}`);
         respond({ response_type: "ephemeral", text: `there was an error joining the huddle in <#${huddleChannel}>!` });

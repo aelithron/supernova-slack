@@ -2,6 +2,7 @@ import { App } from "@slack/bolt";
 import { WebClient } from "@slack/web-api";
 import { configDotenv } from "dotenv";
 import initEvents from "./helper/events.js";
+import polyfill from "./polyfill.js";
 
 let userClient: WebClient | undefined;
 let botClient: App | undefined;
@@ -33,6 +34,7 @@ async function init() {
     console.error(`[init] error starting helper bot: ${e}`);
     process.exit(1);
   }
+  polyfill();
   await initEvents();
   //await userClient.chat.postMessage({ channel: "C0AS67RMDLN", text: "this is being sent by some typescript code! :3" });
 }
