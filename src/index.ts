@@ -36,7 +36,6 @@ async function init() {
   }
   polyfill();
   await initEvents();
-  //await userClient.chat.postMessage({ channel: "C0AS67RMDLN", text: "this is being sent by some typescript code! :3" });
 }
 export function getClients(): { user: WebClient | undefined, helper: App | undefined } { return { user: userClient, helper: botClient }; }
 init();

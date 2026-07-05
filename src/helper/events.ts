@@ -30,8 +30,19 @@ export default async function initEvents() {
         data.append("channel_id", huddleChannel);
         data.append("regions", "us-east-2");
         data.append("token", process.env.SLACK_XOXC);
+        const check = await fetch("https://hackclub.enterprise.slack.com/api/rooms.canJoinHuddle", { method: "POST", body: data, headers: { "Cookie": `d=${process.env.SLACK_XOXD}` } });
+        if (!(await check.json() as { ok: boolean }).ok) {
+          respond({ response_type: "ephemeral", text: `<@U0BESAE7KPD> can't join huddles in <#${huddleChannel}>! you likely need to invite <@U0BESAE7KPD> to your channel.` });
+          return;
+        }
+
+        data.append("multidevice", true);
         const res = await fetch("https://hackclub.enterprise.slack.com/api/rooms.join", { method: "POST", body: data, headers: { "Cookie": `d=${process.env.SLACK_XOXD}` } });
         const info = await res.json() as SlackHuddleBody;
+        if (!info.ok) {
+          respond({ response_type: "ephemeral", text: `<@U0BESAE7KPD> can't join huddles in <#${huddleChannel}>! you likely need to invite <@U0BESAE7KPD> to your channel.` });
+          return;
+        }
         if (await joinHuddle(info)) { 
           respond({ response_type: "ephemeral", text: `got it! telling <@U0BESAE7KPD> to join the huddle...` });
           await user.chat.postMessage({ channel: huddleChannel, thread_ts: info.huddle.thread_root_ts as string, text: `hi everyone! <@${command.user_id}> invited me to this huddle :3` });
@@ -51,4 +62,5 @@ export default async function initEvents() {
       return;
     }
   });
+  
 }
