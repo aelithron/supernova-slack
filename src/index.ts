@@ -3,6 +3,7 @@ import { WebClient } from "@slack/web-api";
 import { configDotenv } from "dotenv";
 import initEvents from "./helper/events.js";
 import polyfill from "./polyfill.js";
+import { Cron } from "croner";
 
 let userClient: WebClient | undefined;
 let botClient: App | undefined;
@@ -36,6 +37,14 @@ async function init() {
   }
   polyfill();
   await initEvents();
+  new Cron("0 * * * *", { timezone: "America/Denver" }, async () => {
+    if (!userClient || !botClient) return;
+    try {
+      await userClient.auth.test();
+    } catch {
+      await botClient.client.chat.postMessage({ channel: "U08RJ1PEM7X", text: "hey <@U08RJ1PEM7X>! the userbot's authentication tokens (`xoxc` and `xoxd`) have expired.\nplease log in to the user account and refresh the tokens in the env vars!" });
+    }
+  });
 }
 export function getClients(): { user: WebClient | undefined, helper: App | undefined } { return { user: userClient, helper: botClient }; }
 init();
