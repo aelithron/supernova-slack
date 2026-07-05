@@ -66,9 +66,25 @@ export default async function initEvents() {
   helper.message(`<@${userID}>`, async ({ message }) => {
     if (message.type !== "message" || (message.subtype !== undefined && message.subtype !== "file_share")) return;
     if (message.user === userID) return;
-    await user.chat.postMessage({ channel: message.channel, thread_ts: message.thread_ts || message.ts, text: "hiii! :3" });
+    let messageContents = `hiii <@${message.user}>! :3`;
+    switch (message.user) {
+      case "U08RJ1PEM7X":
+        messageContents = "hi mom! :cat-heart:";
+        break;
+      case "U0BE3DA1YFR":
+        messageContents = "hi doppel!! :doppel-pet:";
+        break;
+      case "U08CJCZ2Z9S":
+      case "U06SQJ508LF":
+        messageContents = `hiii <@${message.user}>! thanks for organizing <#C0BEAG698GH> and giving nova the motivation to make me! :cat-heart:`;
+        break;
+      default:
+        break;
+    }
+    await user.chat.postMessage({ channel: message.channel, thread_ts: message.thread_ts || message.ts, text: messageContents });
   });
   helper.event("app_mention", async ({ event }) => {
-    await user.chat.postMessage({ channel: event.channel, thread_ts: event.thread_ts || event.ts, text: "hey! you were probably looking for me :3" });
+    if (event.text.includes(`<@${userID}>`) || (event.subtype !== undefined && event.subtype !== "file_share")) return;
+    await user.chat.postMessage({ channel: event.channel, thread_ts: event.thread_ts || event.ts, text: `hey <@${event.user}>! you were probably looking for me :3` });
   });
 }
