@@ -2,8 +2,8 @@ import { joinHuddle, type SlackHuddleBody } from "../huddle.js";
 import { getClients } from "../index.js";
 
 export default async function initEvents() {
-  const { user, helper } = getClients();
-  if (!user || !helper) return;
+  const { user, helper, userListener } = getClients();
+  if (!user || !helper || !userListener) return;
   const userID = (await user.auth.test()).user_id as string;
   helper.command("/huddles", async ({ ack, command, respond }) => {
     ack();
@@ -44,7 +44,7 @@ export default async function initEvents() {
           respond({ response_type: "ephemeral", text: `<@${userID}> can't join huddles in <#${huddleChannel}>! you likely need to invite <@${userID}> to your channel.` });
           return;
         }
-        if (await joinHuddle(info)) { 
+        if (await joinHuddle(info)) {
           respond({ response_type: "ephemeral", text: `got it! telling <@${userID}> to join the huddle...` });
           await user.chat.postMessage({ channel: huddleChannel, thread_ts: info.huddle.thread_root_ts as string, text: `hi everyone! <@${command.user_id}> invited me to this huddle :3` });
         } else {
@@ -63,9 +63,8 @@ export default async function initEvents() {
       return;
     }
   });
-  helper.message(`<@${userID}>`, async ({ message }) => {
-    if (message.type !== "message" || (message.subtype !== undefined && message.subtype !== "file_share")) return;
-    if (message.user === userID) return;
+  userListener.message(`<@${userID}>`, async ({ message }) => {
+    if (message.type !== "message" || (message.subtype !== undefined && message.subtype !== "file_share") || message.user === userID || message.channel_type === "im") return;
     let messageContents = `hiii <@${message.user}>! :3`;
     switch (message.user) {
       case "U08RJ1PEM7X":
@@ -86,5 +85,31 @@ export default async function initEvents() {
   helper.event("app_mention", async ({ event }) => {
     if (event.text.includes(`<@${userID}>`) || (event.subtype !== undefined && event.subtype !== "file_share")) return;
     await user.chat.postMessage({ channel: event.channel, thread_ts: event.thread_ts || event.ts, text: `hey <@${event.user}>! you were probably looking for me :3` });
+  });
+  userListener.message(async ({ message }) => {
+    if (message.type !== "message" || (message.subtype !== undefined && message.subtype !== "file_share") || message.channel_type !== "im") return;
+    const args: string[] = message.text!.split(" ");
+    if (!args || args.length < 1) {
+      await user.chat.postMessage({ channel: message.channel, text: `unrecognized message! say "help" for command info!` });
+      return;
+    }
+    switch (args[0]) {
+      case "hi":
+        await user.chat.postMessage({ channel: message.channel, text: `hiii <@${message.user}>! :3\nsay "help" for command info!`, blocks: [
+          { type: "section", text: { type: "mrkdwn", text: `hiii <@${message.user}>! :3` } },
+          { type: "context", elements: [{ type: "mrkdwn", text: `say "help" for command info!` }] }
+        ]});
+        break;
+      case "a":
+        await user.chat.postMessage({ channel: message.channel, markdown_text: `hiii <@${message.user}>! :3\n` });
+        break;
+      case "help":
+        await user.chat.postMessage({ channel: message.channel, text: `hi! here's some helpful commands :3`, blocks: [
+          { type: "section", text: { type: "mrkdwn", text: "hi! here's the commands i recognize!" } }
+        ]});
+        break;
+      default:
+        await user.chat.postMessage({ channel: message.channel, text: `unrecognized message! say "help" for command info!` });
+    }
   });
 }
