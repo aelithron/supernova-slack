@@ -14,6 +14,7 @@ This project was made for Hack Club [Doppel](https://doppel.hackclub.com)!
 - Can start huddles with a command (`/huddles`)
 - (COMING SOON) Can join huddles and reply when you talk
 - (COMING SOON) Configuration file to adjust bot settings
+- DMs me when the user tokens (XOXC and XOXD) expire
 
 ## Usage
 Right now, you can use the bot in [#supernova-playground](https://hackclub.enterprise.slack.com/archives/C0BFB5KTBM2) if you are in the Hack Club Slack.
@@ -21,7 +22,7 @@ Right now, you can use the bot in [#supernova-playground](https://hackclub.enter
 Some steps on how to self host the bot!
 1. Get your user tokens. This generally involves logging onto Slack on an alt account, with a web browser.
   - Open your browser console and run `JSON.parse(localStorage.localConfig_v2).teams[Object.keys(JSON.parse(localStorage.localConfig_v2).teams)[0]].token` there. Copy the output, that's your XOXC token!
-  - Go to the Storage tab of the browser devtools, and select Cookies for app.slack.com. Look through the list until you find one named `d`. Copy the value of this cookie, which will start with `xoxd`. That's your XOXD token!
+  - Go to the "Application" (or "Storage" on Firefox) tab of the browser devtools, and select Cookies for app.slack.com. Look through the list until you find one named `d`. Copy the value of this cookie, which will start with `xoxd`. That's your XOXD token!
 
 2. Set up an app on [Slack's API portal](https://api.slack.com/apps). You can use the manifest in [`slack-manifest.json`](https://raw.githubusercontent.com/aelithron/supernova-slack/refs/heads/main/slack-manifest.json), feel free to change it as you wish.
   - You will need to add your alt account as a "Collaborator" on the bot, this is done through the sidebar.
