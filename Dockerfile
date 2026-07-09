@@ -8,7 +8,7 @@ RUN corepack enable && corepack prepare pnpm@11.3.0 --activate
 RUN pnpm config set global-bin-dir /pnpm/bin --global
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm add -g typescript && pnpm add -g node-pre-gyp && pnpm install --frozen-lockfile 
+RUN pnpm install --frozen-lockfile && pnpm add -g typescript
 COPY src/ ./src/
 COPY tsconfig.json ./
 RUN pnpm run build

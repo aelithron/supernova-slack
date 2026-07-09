@@ -21,14 +21,11 @@
     "@slack/web-api": "^7.18.0",
     "amazon-chime-sdk-js": "^3.31.0",
     "croner": "^10.0.1",
-    "dotenv": "^17.4.2",
-    "wrtc": "^0.4.7"
+    "dotenv": "^17.4.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@mapbox/node-pre-gyp": "^2.0.3",
     "@types/node": "^26.1.0",
-    "@types/webrtc": "^0.0.47",
     "eslint": "^10.6.0",
     "globals": "^17.7.0",
     "jiti": "^2.7.0",

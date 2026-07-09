@@ -2,7 +2,6 @@ import { App } from "@slack/bolt";
 import { WebClient } from "@slack/web-api";
 import { configDotenv } from "dotenv";
 import initEvents from "./helper/events.js";
-import polyfill from "./polyfill.js";
 import { Cron } from "croner";
 
 let userClient: WebClient | undefined;
@@ -50,7 +49,6 @@ async function init() {
     console.error(`[init] error starting user-listener: ${e}`);
     process.exit(1);
   }
-  polyfill();
   await initEvents();
   new Cron("0 * * * *", { timezone: "America/Denver" }, async () => {
     if (!userClient || !botClient) return;
