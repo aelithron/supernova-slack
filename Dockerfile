@@ -7,7 +7,7 @@ RUN apk update && apk add --no-cache libc6-compat python3 make g++
 RUN corepack enable && corepack prepare pnpm@11.3.0 --activate 
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile && pnpm add -g typescript && pnpm add -g node-pre-gyp
+RUN pnpm add -g typescript && pnpm add -g node-pre-gyp && pnpm install --frozen-lockfile 
 COPY src/ ./src/
 COPY tsconfig.json ./
 RUN pnpm run build
