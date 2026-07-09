@@ -100,13 +100,13 @@ export default async function initEvents() {
           { type: "context", elements: [{ type: "mrkdwn", text: `say "help" for command info!` }] }
         ]});
         break;
-      case "aaa":
-        await user.chat.postMessage({ channel: message.channel, markdown_text: `hiii <@${message.user}>! :3\n` });
+      case "huddles":
+        await user.chat.postMessage({ channel: message.channel, markdown_text: "you're probably looking for `/huddles`, silly :3" });
         break;
       case "help":
         await user.chat.postMessage({ channel: message.channel, text: `hi! here's the commands i recognize! (open this full message to see the commands! :3)`, blocks: [
           { type: "section", text: { type: "plain_text", text: "hi! here's the commands i recognize!" } },
-          { type: "section", text: { type: "mrkdwn", text: `• \`hi\`: have me say hi to you!\n• \`aaa\`: aaa\n• \`help\`: show this message.` } },
+          { type: "section", text: { type: "mrkdwn", text: `• \`hi\`: have me say hi to you!\n• \`help\`: show this message.` } },
           { type: "section", text: { type: "plain_text", text: "you can also try my slash commands:" } },
           { type: "section", text: { type: "mrkdwn", text: `• \`/huddles\`: have me join or leave a huddle (coming soon!)` } }
         ]});
