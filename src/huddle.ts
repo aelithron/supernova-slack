@@ -1,6 +1,7 @@
 import { ConsoleLogger, DefaultDeviceController, DefaultMeetingSession, LogLevel, MeetingSessionConfiguration } from "amazon-chime-sdk-js";
 
 export async function joinHuddle(body: SlackHuddleBody): Promise<boolean> {
+  return true;
   const config = new MeetingSessionConfiguration(body.call.free_willy.meeting, body.call.free_willy.attendee);
   const logger = new ConsoleLogger(`huddle-logger-${body.huddle.id}`, LogLevel.WARN);
   const controller = new DefaultDeviceController(logger);
