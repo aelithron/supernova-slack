@@ -1,18 +1,6 @@
-import { ConsoleLogger, DefaultDeviceController, DefaultMeetingSession, LogLevel, MeetingSessionConfiguration } from "amazon-chime-sdk-js";
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function joinHuddle(body: SlackHuddleBody): Promise<boolean> {
   return true;
-  const config = new MeetingSessionConfiguration(body.call.free_willy.meeting, body.call.free_willy.attendee);
-  const logger = new ConsoleLogger(`huddle-logger-${body.huddle.id}`, LogLevel.WARN);
-  const controller = new DefaultDeviceController(logger);
-  const huddle = new DefaultMeetingSession(config, logger, controller);
-  try {
-    huddle.audioVideo.start();
-    return true;
-  } catch (e) {
-    console.error(`[huddle] error connecting to chime (for a huddle in ${body.huddle.channels[0]}): ${e}`);
-    return false;
-  }
 }
 export type SlackHuddleBody = {
   ok: boolean,
