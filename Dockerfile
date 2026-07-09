@@ -11,7 +11,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile && pnpm add -g typescript
 COPY src/ ./src/
 COPY tsconfig.json ./
-RUN pnpm run build
+RUN NODE_OPTIONS="--max-old-space-size=8192" pnpm run build
 
 EXPOSE 3000
 ENV PORT 3000
