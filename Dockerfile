@@ -4,7 +4,7 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN mkdir /pnpm
 RUN apk update && apk add --no-cache libc6-compat
-RUN corepack enable && corepack prepare pnpm --activate 
+RUN corepack enable && corepack prepare pnpm@11.3.0 --activate 
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile && pnpm add -g typescript
