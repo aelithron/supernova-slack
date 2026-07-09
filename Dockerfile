@@ -3,7 +3,7 @@ USER root
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN mkdir /pnpm
-RUN apk update && apk add --no-cache libc6-compat
+RUN apk update && apk add --no-cache libc6-compat python3 make g++
 RUN corepack enable && corepack prepare pnpm@11.3.0 --activate 
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
