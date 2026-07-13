@@ -3,13 +3,14 @@ import { WebClient } from "@slack/web-api";
 import { configDotenv } from "dotenv";
 import initEvents from "./events.js";
 import { Cron } from "croner";
-import type { Browser } from "puppeteer";
+import type { Browser, Page } from "puppeteer";
 import puppeteer from "puppeteer";
 
 let userClient: WebClient | undefined;
 let botClient: App | undefined;
 let userListenerClient: App | undefined;
 let huddleBrowser: Browser | undefined;
+const huddles: Map<string, { page: Page, ts: string }> = new Map();
 
 async function init() {
   configDotenv({ quiet: true });
@@ -25,7 +26,7 @@ async function init() {
     console.error(`user-listener credentials are missing! please make sure "SLACK_XOXP" is correctly set.`);
     process.exit(1);
   }
-  userClient = new WebClient(process.env.SLACK_XOXC, { headers: { "Cookie": `d=${process.env.SLACK_XOXD}` }});
+  userClient = new WebClient(process.env.SLACK_XOXC, { headers: { "Cookie": `d=${process.env.SLACK_XOXD}` } });
   botClient = new App({ token: process.env.SLACK_BOT_TOKEN, appToken: process.env.SLACK_APP_TOKEN, socketMode: true });
   userListenerClient = new App({ token: process.env.SLACK_XOXP, appToken: process.env.SLACK_APP_TOKEN, socketMode: true });
   try {
@@ -65,10 +66,15 @@ async function init() {
   huddleBrowser = await puppeteer.launch({ args: ["--no-sandbox", "--use-fake-ui-for-media-stream"], headless: true });
 }
 async function shutdown() {
-  if (huddleBrowser) await huddleBrowser.close(); 
+  console.log("[internal] shutting down...");
+  if (huddleBrowser) await huddleBrowser.close();
+  if (botClient) botClient.stop();
+  if (userListenerClient) userListenerClient.stop();
+  process.exit(0);
 }
 export function getClients(): { user: WebClient | undefined, helper: App | undefined, userListener: App | undefined } { return { user: userClient, helper: botClient, userListener: userListenerClient }; }
-export function getHuddles(): { browser: Browser | undefined } { return { browser: huddleBrowser }; }
+export function getHuddles(): { browser: Browser | undefined, list: Map<string, { page: Page, ts: string }> } { return { browser: huddleBrowser, list: huddles }; }
 init();
-process.on("SIGTERM", async () => await shutdown());
-process.on("SIGINT", async () => await shutdown());
+process.on("SIGTERM", () => shutdown());
+process.on("SIGINT", () => shutdown());
+process.on("SIGUSR2", () => shutdown());

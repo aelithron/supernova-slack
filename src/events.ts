@@ -1,5 +1,5 @@
 import { joinHuddle, type SlackHuddleBody } from "./huddle.js";
-import { getClients } from "./index.js";
+import { getClients, getHuddles } from "./index.js";
 
 export default async function initEvents() {
   const { user, helper, userListener } = getClients();
@@ -59,7 +59,20 @@ export default async function initEvents() {
       return;
     }
     if (args[0] === "leave") {
-      console.log(huddleChannel);
+      const { list } = getHuddles();
+      const huddle = list.get(huddleChannel);
+      if (!huddle) {
+        respond({ response_type: "ephemeral", text: `i'm not in a huddle in <#${huddleChannel}>!` });
+        return;
+      }
+      await huddle.page.evaluate(() => {
+        //@ts-expect-error - reference to in-browser code
+        huddle.audioVideo.stop();
+      });
+      await huddle.page.close();
+      list.delete(huddleChannel);
+      respond({ response_type: "ephemeral", text: `got it! telling <@${userID}> to leave the huddle...` });
+      await user.chat.postMessage({ channel: huddleChannel, thread_ts: huddle.ts, text: `<@${command.user_id}> told me to leave this huddle, cya all later! :byee:` });
       return;
     }
   });
@@ -95,21 +108,25 @@ export default async function initEvents() {
     }
     switch (args[0]) {
       case "hi":
-        await user.chat.postMessage({ channel: message.channel, text: `hiii <@${message.user}>! :3\nsay "help" for command info!`, blocks: [
-          { type: "section", text: { type: "mrkdwn", text: `hiii <@${message.user}>! :3` } },
-          { type: "context", elements: [{ type: "mrkdwn", text: `say "help" for command info!` }] }
-        ]});
+        await user.chat.postMessage({
+          channel: message.channel, text: `hiii <@${message.user}>! :3\nsay "help" for command info!`, blocks: [
+            { type: "section", text: { type: "mrkdwn", text: `hiii <@${message.user}>! :3` } },
+            { type: "context", elements: [{ type: "mrkdwn", text: `say "help" for command info!` }] }
+          ]
+        });
         break;
       case "huddles":
         await user.chat.postMessage({ channel: message.channel, markdown_text: "you're probably looking for `/huddles`, silly :3" });
         break;
       case "help":
-        await user.chat.postMessage({ channel: message.channel, text: `hi! here's the commands i recognize! (open this full message to see the commands! :3)`, blocks: [
-          { type: "section", text: { type: "plain_text", text: "hi! here's the commands i recognize!" } },
-          { type: "section", text: { type: "mrkdwn", text: `• \`hi\`: have me say hi to you!\n• \`help\`: show this message.` } },
-          { type: "section", text: { type: "plain_text", text: "you can also try my slash commands:" } },
-          { type: "section", text: { type: "mrkdwn", text: `• \`/huddles\`: have me join or leave a huddle (coming soon!)` } }
-        ]});
+        await user.chat.postMessage({
+          channel: message.channel, text: `hi! here's the commands i recognize! (open this full message to see the commands! :3)`, blocks: [
+            { type: "section", text: { type: "plain_text", text: "hi! here's the commands i recognize!" } },
+            { type: "section", text: { type: "mrkdwn", text: `• \`hi\`: have me say hi to you!\n• \`help\`: show this message.` } },
+            { type: "section", text: { type: "plain_text", text: "you can also try my slash commands:" } },
+            { type: "section", text: { type: "mrkdwn", text: `• \`/huddles\`: have me join or leave a huddle (coming soon!)` } }
+          ]
+        });
         break;
       default:
         await user.chat.postMessage({ channel: message.channel, text: `unrecognized command! say "help" for command info!` });

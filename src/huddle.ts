@@ -3,7 +3,7 @@ import { getHuddles } from "./index.js";
 import { fileURLToPath } from "node:url";
 
 export async function joinHuddle(body: SlackHuddleBody): Promise<boolean> {
-  const { browser } = getHuddles();
+  const { browser, list } = getHuddles();
   if (!browser) return false;
   const page = await browser.newPage();
   await page.goto(`file://${path.join(path.dirname(fileURLToPath(import.meta.url)), "../huddles/index.html")}`);
@@ -12,9 +12,7 @@ export async function joinHuddle(body: SlackHuddleBody): Promise<boolean> {
     //@ts-expect-error - reference to in-browser code
     window.joinHuddle(body.call.free_willy.meeting, body.call.free_willy.attendee);
   }, body);
-  
-  console.log(JSON.stringify(body, null, 2));
-  setTimeout(async () => await page.close(), 60000);
+  list.set(body.huddle.channels[0]!, { page, ts: body.huddle.thread_root_ts });
   return true;
 }
 
