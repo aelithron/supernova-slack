@@ -6,12 +6,15 @@ export async function joinHuddle(body: SlackHuddleBody): Promise<boolean> {
   const { browser } = getHuddles();
   if (!browser) return false;
   const page = await browser.newPage();
-  await page.goto(path.join(path.dirname(fileURLToPath(import.meta.url)), "../huddles/index.html"));
+  await page.goto(`file://${path.join(path.dirname(fileURLToPath(import.meta.url)), "../huddles/index.html")}`);
   await page.addScriptTag({ path: path.join(path.dirname(fileURLToPath(import.meta.url)), "../huddles/index.js") });
-  
+  await page.evaluate((body) => {
+    //@ts-expect-error - reference to in-browser code
+    window.joinHuddle(body.call.free_willy.meeting, body.call.free_willy.attendee);
+  }, body);
   
   console.log(JSON.stringify(body, null, 2));
-  await page.close();
+  setTimeout(async () => await page.close(), 60000);
   return true;
 }
 

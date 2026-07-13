@@ -7,7 +7,7 @@ import json from "@rollup/plugin-json";
 
 export default defineConfig({
   input: "huddles/chimesdkbuild.js",
-  output: [{ file: "huddles/amazon-chime-sdk.min.js", format: "cjs", name: "ChimeSDK", sourcemap: true, inlineDynamicImports: true }],
+  output: [{ file: "huddles/amazon-chime-sdk.min.js", format: "umd", name: "ChimeSDK", sourcemap: true, inlineDynamicImports: true }],
   plugins: [
     resolve({ browser: true, mainFields: ["module", "browser"] }),
     json(),
