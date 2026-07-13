@@ -1,7 +1,20 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import path from "node:path";
+import { getHuddles } from "./index.js";
+import { fileURLToPath } from "node:url";
+
 export async function joinHuddle(body: SlackHuddleBody): Promise<boolean> {
+  const { browser } = getHuddles();
+  if (!browser) return false;
+  const page = await browser.newPage();
+  await page.goto(path.join(path.dirname(fileURLToPath(import.meta.url)), "../huddles/index.html"));
+  await page.addScriptTag({ path: path.join(path.dirname(fileURLToPath(import.meta.url)), "../huddles/index.js") });
+  
+  
+  console.log(JSON.stringify(body, null, 2));
+  await page.close();
   return true;
 }
+
 export type SlackHuddleBody = {
   ok: boolean,
   call: {

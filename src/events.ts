@@ -1,5 +1,5 @@
-import { joinHuddle, type SlackHuddleBody } from "../huddle.js";
-import { getClients } from "../index.js";
+import { joinHuddle, type SlackHuddleBody } from "./huddle.js";
+import { getClients } from "./index.js";
 
 export default async function initEvents() {
   const { user, helper, userListener } = getClients();

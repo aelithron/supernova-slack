@@ -9,5 +9,5 @@ export default defineConfig([
   { rules: {
     "semi": ["warn", "always"]
   }},
-  globalIgnores(["dist/"])
+  globalIgnores(["dist/", "huddles/"])
 ]);

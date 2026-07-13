@@ -1,0 +1,1 @@
+export * as default from "amazon-chime-sdk-js";

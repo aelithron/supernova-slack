@@ -1,12 +1,16 @@
 import { App } from "@slack/bolt";
 import { WebClient } from "@slack/web-api";
 import { configDotenv } from "dotenv";
-import initEvents from "./helper/events.js";
+import initEvents from "./events.js";
 import { Cron } from "croner";
+import type { Browser } from "puppeteer";
+import puppeteer from "puppeteer";
 
 let userClient: WebClient | undefined;
 let botClient: App | undefined;
 let userListenerClient: App | undefined;
+let huddleBrowser: Browser | undefined;
+
 async function init() {
   configDotenv({ quiet: true });
   if (!process.env.SLACK_XOXC || !process.env.SLACK_XOXD) {
@@ -58,6 +62,13 @@ async function init() {
       await botClient.client.chat.postMessage({ channel: "U08RJ1PEM7X", text: "hey <@U08RJ1PEM7X>! the userbot's authentication tokens (`xoxc` and `xoxd`) have expired.\nplease log in to the user account and refresh the tokens in the env vars!" });
     }
   });
+  huddleBrowser = await puppeteer.launch({ args: ["--no-sandbox", "--use-fake-ui-for-media-stream"], headless: true });
+}
+async function shutdown() {
+  if (huddleBrowser) await huddleBrowser.close(); 
 }
 export function getClients(): { user: WebClient | undefined, helper: App | undefined, userListener: App | undefined } { return { user: userClient, helper: botClient, userListener: userListenerClient }; }
+export function getHuddles(): { browser: Browser | undefined } { return { browser: huddleBrowser }; }
 init();
+process.on("SIGTERM", async () => await shutdown());
+process.on("SIGINT", async () => await shutdown());

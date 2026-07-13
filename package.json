@@ -7,7 +7,8 @@
     "dev": "nodemon -w package.json -w src -x 'tsx' --delay 2.5s ./src/index.ts",
     "lint": "eslint",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "bundle-chime": "rollup --config rollup.config.ts"
   },
   "keywords": [
     "slack",
@@ -19,16 +20,23 @@
   "dependencies": {
     "@slack/bolt": "^4.7.3",
     "@slack/web-api": "^7.18.0",
+    "amazon-chime-sdk-js": "^3.31.0",
     "croner": "^10.0.1",
-    "dotenv": "^17.4.2"
+    "dotenv": "^17.4.2",
+    "puppeteer": "^25.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@rollup/plugin-commonjs": "^29.0.3",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^1.0.0",
     "@types/node": "^26.1.0",
     "eslint": "^10.6.0",
     "globals": "^17.7.0",
     "jiti": "^2.7.0",
     "nodemon": "^3.1.14",
+    "rollup": "^4.62.2",
     "tsx": "^4.23.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.62.1"
