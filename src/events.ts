@@ -2,8 +2,8 @@ import { joinHuddle, type SlackHuddleBody } from "./huddle.js";
 import { getClients, getHuddles } from "./index.js";
 
 export default async function initEvents() {
-  const { user, helper, userListener } = getClients();
-  if (!user || !helper || !userListener) return;
+  const { user, helper } = getClients();
+  if (!user || !helper) return;
   const userID = (await user.auth.test()).user_id as string;
   helper.command("/huddles", async ({ ack, command, respond }) => {
     ack();
@@ -76,7 +76,7 @@ export default async function initEvents() {
       return;
     }
   });
-  userListener.message(`<@${userID}>`, async ({ message }) => {
+  helper.message(`<@${userID}>`, async ({ message }) => {
     if (message.type !== "message" || (message.subtype !== undefined && message.subtype !== "file_share") || message.user === userID || message.channel_type === "im") return;
     let messageContents = `hiii <@${message.user}>! :3`;
     switch (message.user) {
@@ -99,8 +99,8 @@ export default async function initEvents() {
     if (event.text.includes(`<@${userID}>`) || (event.subtype !== undefined && event.subtype !== "file_share")) return;
     await user.chat.postMessage({ channel: event.channel, thread_ts: event.thread_ts || event.ts, text: `hey <@${event.user}>! you were probably looking for me :3` });
   });
-  userListener.message(async ({ message }) => {
-    if (message.type !== "message" || (message.subtype !== undefined && message.subtype !== "file_share") || message.channel_type !== "im") return;
+  helper.message(async ({ message }) => {
+    if (message.type !== "message" || (message.subtype !== undefined && message.subtype !== "file_share") || message.channel_type !== "im" || message.user === userID) return;
     const args: string[] = message.text!.split(" ");
     if (!args || args.length < 1) {
       await user.chat.postMessage({ channel: message.channel, text: `unrecognized message! say "help" for command info!` });

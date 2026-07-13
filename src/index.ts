@@ -8,7 +8,6 @@ import puppeteer from "puppeteer";
 
 let userClient: WebClient | undefined;
 let botClient: App | undefined;
-let userListenerClient: App | undefined;
 let huddleBrowser: Browser | undefined;
 const huddles: Map<string, { page: Page, ts: string }> = new Map();
 
@@ -28,7 +27,6 @@ async function init() {
   }
   userClient = new WebClient(process.env.SLACK_XOXC, { headers: { "Cookie": `d=${process.env.SLACK_XOXD}` } });
   botClient = new App({ token: process.env.SLACK_BOT_TOKEN, appToken: process.env.SLACK_APP_TOKEN, socketMode: true });
-  userListenerClient = new App({ token: process.env.SLACK_XOXP, appToken: process.env.SLACK_APP_TOKEN, socketMode: true });
   try {
     const me = await userClient.auth.test();
     console.log(`[init] userbot is ready as ${me.user} (${me.user_id})!`);
@@ -43,15 +41,6 @@ async function init() {
     console.log(`[init] helper bot is ready as ${me.user} (${me.user_id})!`);
   } catch (e) {
     console.error(`[init] error starting helper bot: ${e}`);
-    process.exit(1);
-  }
-  try {
-    await userListenerClient.start();
-    userListenerClient.logger.setName("supernova-listener-bot");
-    const me = await userListenerClient.client.auth.test();
-    console.log(`[init] user-listener is ready as ${me.user} (${me.user_id})!`);
-  } catch (e) {
-    console.error(`[init] error starting user-listener: ${e}`);
     process.exit(1);
   }
   await initEvents();
@@ -69,10 +58,9 @@ async function shutdown() {
   console.log("[internal] shutting down...");
   if (huddleBrowser) await huddleBrowser.close();
   if (botClient) botClient.stop();
-  if (userListenerClient) userListenerClient.stop();
   process.exit(0);
 }
-export function getClients(): { user: WebClient | undefined, helper: App | undefined, userListener: App | undefined } { return { user: userClient, helper: botClient, userListener: userListenerClient }; }
+export function getClients(): { user: WebClient | undefined, helper: App | undefined } { return { user: userClient, helper: botClient }; }
 export function getHuddles(): { browser: Browser | undefined, list: Map<string, { page: Page, ts: string }> } { return { browser: huddleBrowser, list: huddles }; }
 init();
 process.on("SIGTERM", () => shutdown());
