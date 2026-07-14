@@ -4,7 +4,7 @@
   "description": "A personal selfbot for Slack!",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "nodemon -w package.json -w src -x 'tsx' --delay 2.5s ./src/index.ts",
+    "dev": "nodemon -w package.json -w src -w huddles -x 'tsx' --delay 2.5s ./src/index.ts",
     "lint": "eslint",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",

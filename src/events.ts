@@ -1,5 +1,7 @@
+import path from "node:path";
 import { joinHuddle, type SlackHuddleBody } from "./huddle.js";
 import { getClients, getHuddles } from "./index.js";
+import { fileURLToPath } from "node:url";
 
 export default async function initEvents() {
   const { user, helper } = getClients();
@@ -25,6 +27,7 @@ export default async function initEvents() {
       }
       huddleChannel = args[1]!.slice(2, -1);
     } else huddleChannel = command.channel_id;
+    const { list } = getHuddles();
     if (args[0] === "join") {
       try {
         const data = new FormData();
@@ -44,6 +47,10 @@ export default async function initEvents() {
           respond({ response_type: "ephemeral", text: `<@${userID}> can't join huddles in <#${huddleChannel}>! you likely need to invite <@${userID}> to your channel.` });
           return;
         }
+        if (list.has(huddleChannel)) {
+          respond({ response_type: "ephemeral", text: `<@${userID}> is already huddling in <#${huddleChannel}>!` });
+          return;
+        }
         if (await joinHuddle(info)) {
           respond({ response_type: "ephemeral", text: `got it! telling <@${userID}> to join the huddle...` });
           await user.chat.postMessage({ channel: huddleChannel, thread_ts: info.huddle.thread_root_ts as string, text: `hi everyone! <@${command.user_id}> invited me to this huddle :3` });
@@ -59,17 +66,19 @@ export default async function initEvents() {
       return;
     }
     if (args[0] === "leave") {
-      const { list } = getHuddles();
       const huddle = list.get(huddleChannel);
       if (!huddle) {
-        respond({ response_type: "ephemeral", text: `i'm not in a huddle in <#${huddleChannel}>!` });
+        respond({ response_type: "ephemeral", text: `<@${userID}> isn't in a huddle in <#${huddleChannel}>!` });
         return;
       }
-      await huddle.page.evaluate(() => {
+      const leaveEffect = path.join(path.dirname(fileURLToPath(import.meta.url)), "../huddles/sounds/leave.mp3");
+      await huddle.page.evaluate((leaveEffect) => {
         //@ts-expect-error - reference to in-browser code
-        huddle.audioVideo.stop();
-      });
-      await huddle.page.close();
+        window.playSound(leaveEffect);
+        //@ts-expect-error - reference to in-browser code ^2
+        setTimeout(() => window.huddle.audioVideo.stop(), 2000);
+      }, leaveEffect);
+      setTimeout(async () => await huddle.page.close(), 2500);
       list.delete(huddleChannel);
       respond({ response_type: "ephemeral", text: `got it! telling <@${userID}> to leave the huddle...` });
       await user.chat.postMessage({ channel: huddleChannel, thread_ts: huddle.ts, text: `<@${command.user_id}> told me to leave this huddle, cya all later! :byee:` });
@@ -106,7 +115,7 @@ export default async function initEvents() {
       await user.chat.postMessage({ channel: message.channel, text: `unrecognized message! say "help" for command info!` });
       return;
     }
-    switch (args[0]) {
+    switch (args[0]?.toLowerCase()) {
       case "hi":
         await user.chat.postMessage({
           channel: message.channel, text: `hiii <@${message.user}>! :3\nsay "help" for command info!`, blocks: [

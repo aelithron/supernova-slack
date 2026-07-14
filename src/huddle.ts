@@ -6,12 +6,16 @@ export async function joinHuddle(body: SlackHuddleBody): Promise<boolean> {
   const { browser, list } = getHuddles();
   if (!browser) return false;
   const page = await browser.newPage();
-  await page.goto(`file://${path.join(path.dirname(fileURLToPath(import.meta.url)), "../huddles/index.html")}`);
-  await page.addScriptTag({ path: path.join(path.dirname(fileURLToPath(import.meta.url)), "../huddles/index.js") });
-  await page.evaluate((body) => {
+  const basePath = path.join(path.dirname(fileURLToPath(import.meta.url)), "../");
+  await page.goto(`file://${path.join(basePath, "./huddles/index.html")}`);
+  await page.addScriptTag({ path: path.join(basePath, "./huddles/index.js") });
+  const joinEffect = path.join(basePath, "./huddles/sounds/join.mp3");
+  await page.evaluate((body, joinEffect) => {
     //@ts-expect-error - reference to in-browser code
     window.joinHuddle(body.call.free_willy.meeting, body.call.free_willy.attendee);
-  }, body);
+    //@ts-expect-error - reference to in-browser code but again
+    setTimeout(() => window.playSound(joinEffect), 1000);
+  }, body, joinEffect);
   list.set(body.huddle.channels[0]!, { page, ts: body.huddle.thread_root_ts });
   return true;
 }

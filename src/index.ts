@@ -52,7 +52,7 @@ async function init() {
       await botClient.client.chat.postMessage({ channel: "U08RJ1PEM7X", text: "hey <@U08RJ1PEM7X>! the userbot's authentication tokens (`xoxc` and `xoxd`) have expired.\nplease log in to the user account and refresh the tokens in the env vars!" });
     }
   });
-  huddleBrowser = await puppeteer.launch({ args: ["--no-sandbox", "--use-fake-ui-for-media-stream"], headless: true });
+  huddleBrowser = await puppeteer.launch({ args: ["--no-sandbox", "--use-fake-ui-for-media-stream", "--allow-file-access-from-files"], headless: true });
 }
 async function shutdown() {
   console.log("[internal] shutting down...");
