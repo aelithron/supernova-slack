@@ -13,16 +13,12 @@ const huddles: Map<string, { page: Page, ts: string }> = new Map();
 
 async function init() {
   configDotenv({ quiet: true });
-  if (!process.env.SLACK_XOXC || !process.env.SLACK_XOXD) {
-    console.error(`user credentials are missing! please make sure "SLACK_XOXC" and "SLACK_XOXD" are correctly set.`);
+  if (!process.env.SLACK_XOXC || !process.env.SLACK_XOXD || !process.env.SLACK_XOXP) {
+    console.error(`user credentials are missing! please make sure "SLACK_XOXC", "SLACK_XOXD", and "SLACK_XOXP" are correctly set.`);
     process.exit(1);
   }
   if (!process.env.SLACK_BOT_TOKEN || !process.env.SLACK_APP_TOKEN) {
     console.error(`bot credentials are missing! please make sure "SLACK_BOT_TOKEN" and "SLACK_APP_TOKEN" are correctly set.`);
-    process.exit(1);
-  }
-  if (!process.env.SLACK_XOXP) {
-    console.error(`user-listener credentials are missing! please make sure "SLACK_XOXP" is correctly set.`);
     process.exit(1);
   }
   userClient = new WebClient(process.env.SLACK_XOXC, { headers: { "Cookie": `d=${process.env.SLACK_XOXD}` } });
@@ -49,7 +45,7 @@ async function init() {
     try {
       await userClient.auth.test();
     } catch {
-      await botClient.client.chat.postMessage({ channel: "U08RJ1PEM7X", text: "hey <@U08RJ1PEM7X>! the userbot's authentication tokens (`xoxc` and `xoxd`) have expired.\nplease log in to the user account and refresh the tokens in the env vars!" });
+      await botClient.client.chat.postMessage({ channel: (process.env.HOSTER_SLACK_ID || "U08RJ1PEM7X"), text: `hey <@${process.env.HOSTER_SLACK_ID || "U08RJ1PEM7X"}>! the userbot's authentication tokens (\`xoxc\` and \`xoxd\`) have expired.\nplease log in to the user account and refresh the tokens in the env vars!` });
     }
   });
   huddleBrowser = await puppeteer.launch({ args: ["--no-sandbox", "--use-fake-ui-for-media-stream", "--allow-file-access-from-files"], headless: true });

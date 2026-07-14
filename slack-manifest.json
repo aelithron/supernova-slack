@@ -19,7 +19,7 @@
             {
                 "command": "/huddles",
                 "description": "controls huddles for @supernova",
-                "usage_hint": "<join|leave> [channel]",
+                "usage_hint": "<join|leave|play>",
                 "should_escape": true
             }
         ]

@@ -1,4 +1,3 @@
-**⚠️ This project is not completed yet, and will have bugs!**
 # supernova-slack ![IMG](https://hackatime-badge.hackclub.com/U08RJ1PEM7X/supernova-slack)
 
 A personal selfbot for Slack! \
@@ -11,10 +10,9 @@ This project was made for Hack Club [Doppel](https://doppel.hackclub.com)!
 ## Features
 - Responds to commands sent in DMs
 - Responds when pinging the user and bot accounts
-- Can start huddles with a command (`/huddles`)
-- (COMING SOON) Can join huddles and reply when you talk
-- (COMING SOON) Configuration file to adjust bot settings
-- DMs me when the user tokens (XOXC and XOXD) expire
+- Can start, join, leave, and play sounds in huddles via a command (`/huddles`)
+- Can reply when you talk in huddles
+- DMs you when the user tokens (XOXC and XOXD) expire
 
 ## Usage
 Right now, you can use the bot in [#supernova-playground](https://hackclub.enterprise.slack.com/archives/C0BFB5KTBM2) if you are in the Hack Club Slack.
@@ -43,6 +41,7 @@ services:
       SLACK_XOXP: (insert xoxp here)
       SLACK_BOT_TOKEN: (insert xoxb here)
       SLACK_APP_TOKEN: (insert xapp here)
+      HOSTER_SLACK_ID: (insert your personal slack id here)
 ```
 Then, run the following in a terminal: `docker compose up -d`
 #### With `docker run`
@@ -55,6 +54,7 @@ docker run -d \
   -e SLACK_XOXP="" \
   -e SLACK_BOT_TOKEN="" \
   -e SLACK_APP_TOKEN="" \
+  -e HOSTER_SLACK_ID="" \
   --restart unless-stopped \
   ghcr.io/aelithron/supernova-slack:latest
 ```
