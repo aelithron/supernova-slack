@@ -10,16 +10,23 @@ export default async function initEvents() {
   helper.command("/huddles", async ({ ack, command, respond }) => {
     ack();
     const args: string[] = command.text.split(" ");
-    if (args.length < 1 || (args[0] !== "join" && args[0] !== "leave")) {
+    if (args.length < 1 || (args[0] !== "join" && args[0] !== "leave" && args[0] !== "play")) {
       await respond({
         response_type: "ephemeral",
-        text: "incorrect usage!\n• /huddles join [channel]: have @supernova join a huddle in a channel\n• /huddles leave [channel]: have @supernova leave a huddle in a channel",
-        blocks: [{ type: "section", text: { type: "mrkdwn", text: `*incorrect usage!*\n• \`/huddles join [channel]\`: have <@${userID}> join a huddle in a channel\n• \`/huddles leave [channel]\`: have <@${userID}> leave a huddle in a channel` } }]
+        text: "incorrect usage!\n• /huddles join [channel]: have @supernova join a huddle in a channel\n• /huddles leave [channel]: have @supernova leave a huddle in a channel\n• /huddles play [sound] [channel]: have @supernova play a sound, or list sounds",
+        blocks: [{ type: "section", text: { type: "mrkdwn", text: `*incorrect usage!*\n• \`/huddles join [channel]\`: have <@${userID}> join a huddle in a channel\n• \`/huddles leave [channel]\`: have <@${userID}> leave a huddle in a channel\n• \`/huddles play [sound] [channel]\`: have <@${userID}> play a sound, or list sounds` } }]
       });
       return;
     }
     let huddleChannel;
-    if (args.length >= 2) {
+    if (args.length >= 3 && args[0] === "play") {
+      const match = args[2]!.match(/<#C[A-Z0-9]{8,11}>/gm);
+      if (!match) {
+        respond({ response_type: "ephemeral", text: "you provided a channel to join, but in the wrong format! make sure the channel name is blue in the command." });
+        return;
+      }
+      huddleChannel = args[2]!.slice(2, -1);
+    } else if (args.length >= 2 && args[0] !== "play") {
       const match = args[1]!.match(/<#C[A-Z0-9]{8,11}>/gm);
       if (!match) {
         respond({ response_type: "ephemeral", text: "you provided a channel to join, but in the wrong format! make sure the channel name is blue in the command." });
@@ -52,7 +59,7 @@ export default async function initEvents() {
           return;
         }
         if (await joinHuddle(info)) {
-          respond({ response_type: "ephemeral", text: `got it! telling <@${userID}> to join the huddle...` });
+          respond({ response_type: "ephemeral", text: `got it! telling <@${userID}> to join the huddle in <#${huddleChannel}>...` });
           await user.chat.postMessage({ channel: huddleChannel, thread_ts: info.huddle.thread_root_ts as string, text: `hi everyone! <@${command.user_id}> invited me to this huddle :3` });
         } else {
           respond({ response_type: "ephemeral", text: `there was an error joining the huddle in <#${huddleChannel}>!` });
@@ -80,8 +87,41 @@ export default async function initEvents() {
       }, leaveEffect);
       setTimeout(async () => await huddle.page.close(), 2500);
       list.delete(huddleChannel);
-      respond({ response_type: "ephemeral", text: `got it! telling <@${userID}> to leave the huddle...` });
+      respond({ response_type: "ephemeral", text: `got it! telling <@${userID}> to leave the huddle in <#${huddleChannel}>...` });
       await user.chat.postMessage({ channel: huddleChannel, thread_ts: huddle.ts, text: `<@${command.user_id}> told me to leave this huddle, cya all later! :byee:` });
+      return;
+    }
+    if (args[0] === "play") {
+      if (args.length < 2 || (args[1] !== "meow")) {
+        await respond({
+          response_type: "ephemeral",
+          text: "all sounds\n• meow: a little meow! :3",
+          blocks: [
+            { type: "section", text: { type: "mrkdwn", text: `*all sounds:*\n• \`meow\`: a little meow! :3c:` } },
+            { type: "context", elements: [{ type: "mrkdwn", text: `to play a sound: \`/huddles play <sound> [channel]\`` }] }
+          ]
+        });
+        return;
+      }
+      const huddle = list.get(huddleChannel);
+      if (!huddle) {
+        respond({ response_type: "ephemeral", text: `<@${userID}> isn't in a huddle in <#${huddleChannel}>!` });
+        return;
+      }
+      const basePath = path.join(path.dirname(fileURLToPath(import.meta.url)), "../");
+      let audioPath;
+      switch (args[1].toLowerCase()) {
+        case "meow":
+            audioPath = path.join(basePath, "./huddles/sounds/meow.mp3");
+          break;
+        default:
+          return;
+      }
+      await huddle.page.evaluate((audioPath) => {
+        //@ts-expect-error - reference to in-browser code
+        window.playSound(audioPath);
+      }, audioPath);
+      respond({ response_type: "ephemeral", text: `telling <@${userID}> to play \`${args[1]}\` in <#${huddleChannel}>...` });
       return;
     }
   });
