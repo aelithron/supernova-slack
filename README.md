@@ -36,6 +36,7 @@ services:
     image: ghcr.io/aelithron/supernova-slack:latest
     container_name: supernova-slack
     restart: unless-stopped
+    shm_size: "1g"
     environment:
       SLACK_XOXC: (insert xoxc here)
       SLACK_XOXD: (insert xoxd here)
@@ -57,6 +58,7 @@ docker run -d \
   -e SLACK_APP_TOKEN="" \
   -e HOSTER_SLACK_ID="" \
   --restart unless-stopped \
+  --shm-size=1g \
   ghcr.io/aelithron/supernova-slack:latest
 ```
 4. There you go! Your bot should now be online :3
