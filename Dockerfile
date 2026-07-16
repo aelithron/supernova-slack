@@ -4,7 +4,9 @@ WORKDIR /app
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME/bin:$PATH"
 RUN mkdir /pnpm
-RUN apk update && apk add --no-cache libc6-compat
+RUN apk update && apk add --no-cache libc6-compat chromium nss freetype harfbuzz ca-certificates ttf-freefont udev
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 RUN npm install -g pnpm@11.3.0
 RUN pnpm config set global-bin-dir /pnpm/bin --global
 
