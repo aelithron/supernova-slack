@@ -83,21 +83,25 @@ export default async function initEvents() {
         //@ts-expect-error - reference to in-browser code
         window.playSound(leaveEffect);
         //@ts-expect-error - reference to in-browser code ^2
-        setTimeout(() => window.huddle.audioVideo.stop(), 2000);
+        setTimeout(() => window.huddle.audioVideo.stop(), 1500);
       }, leaveEffect);
-      setTimeout(async () => await huddle.page.close(), 2500);
+      setTimeout(async () => await huddle.page.close(), 2000);
       list.delete(huddleChannel);
       respond({ response_type: "ephemeral", text: `got it! telling <@${userID}> to leave the huddle in <#${huddleChannel}>...` });
-      await user.chat.postMessage({ channel: huddleChannel, thread_ts: huddle.ts, text: `<@${command.user_id}> told me to leave this huddle, cya all later! :byee:` });
+      try {
+        await user.chat.postMessage({ channel: huddleChannel, thread_ts: huddle.ts, text: `<@${command.user_id}> told me to leave this huddle, cya all later! :byee:` });
+      } catch (e) {
+        if ((e as Error).message.includes("")) respond({ response_type: "ephemeral", text: `turns out, <@${userID}> isn't in the channel! please add <@${userID}> to use this command.` });
+      }
       return;
     }
     if (args[0] === "play") {
-      if (args.length < 2 || (args[1] !== "meow")) {
+      if (args.length < 2 || (args[1] !== "meow" && args[1] !== "pipe" && args[1] !== "bell")) {
         await respond({
           response_type: "ephemeral",
-          text: "all sounds\n• meow: a little meow! :3",
+          text: "all sounds\n• meow: a little meow! :3\n• pipe: metal pipe falling (loud)\n• bell: bell tolling",
           blocks: [
-            { type: "section", text: { type: "mrkdwn", text: `*all sounds:*\n• \`meow\`: a little meow! :3c:` } },
+            { type: "section", text: { type: "mrkdwn", text: `*all sounds:*\n• \`meow\`: a little meow! :3c:\n• \`pipe\`: metal pipe falling (loud)\n• \`bell\`: bell tolling` } },
             { type: "context", elements: [{ type: "mrkdwn", text: `to play a sound: \`/huddles play <sound> [channel]\`` }] }
           ]
         });
@@ -112,7 +116,13 @@ export default async function initEvents() {
       let audioPath;
       switch (args[1].toLowerCase()) {
         case "meow":
-            audioPath = path.join(basePath, "./huddles/sounds/meow.mp3");
+          audioPath = path.join(basePath, "./huddles/sounds/meow.mp3");
+          break;
+        case "pipe":
+          audioPath = path.join(basePath, "./huddles/sounds/pipe.mp3");
+          break;
+        case "bell":
+          audioPath = path.join(basePath, "./huddles/sounds/bell.mp3");
           break;
         default:
           return;
